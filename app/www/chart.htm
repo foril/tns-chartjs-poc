@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+	<style type="text/css">
+
+	body{
+		font-family: -apple-system, "San Francisco", "Helvetica Neue", Helvetica, “Lucida Grande”, Roboto, “Segoe UI”, Arial, Ubuntu, sans-serif;
+	}
+
+	li{
+		list-style-type: none;
+		line-height: 20px;
+		font-size: 18px;
+	}
+
+	.chart-legend li span{
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		border-radius: 10px;
+		margin-right: 10px;
+	}
+	</style>
+
+</head>
+<body>
+    <div id="canvas-holder" style="width:100%; height: 100%; margin: 0 auto;">
+        <canvas id="chart-area" ></canvas>
+    </div>
+    <div id="js-legend" class="chart-legend"></div>
+
+    <script>
+
+	window.location.getParam = function (field) {
+		var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+		var param = reg.exec(this.href);
+		return param ? param[1] : null;
+	};
+
+	String.prototype.format = function() {
+		var formatted = this;
+		for( var arg in arguments ) {
+		    formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+		}
+		return formatted;
+	};
+
+	chartColors = {
+		red: 'rgb(255, 99, 132)',
+		orange: 'rgb(255, 159, 64)',
+		yellow: 'rgb(255, 205, 86)',
+		green: 'rgb(75, 192, 192)',
+		blue: 'rgb(54, 162, 235)',
+		purple: 'rgb(153, 102, 255)',
+		grey: 'rgb(201, 203, 207)'
+	};
+
+    var config = {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [],
+                backgroundColor: [],
+                labels: []
+            }],
+            labels: []
+        },
+        options: {
+            responsive: true,
+            legend: {
+	            display: false,
+	        },
+			legendCallback: function(chart) {
+				var text = '';
+				text += '<ul>';
+				for (var i=0; i < chart.data.datasets[0].data.length; i++) {
+					text += "<li><span style='background-color:{0}'></span>{1} {2}</li>".format(chart.data.datasets[0].backgroundColor[i], chart.data.datasets[0].labels[i], chart.data.datasets[0].data[i]);
+				}
+				text += '</ul>';
+				return text;
+			},
+	        title: {
+	            display: true,
+	            fontSize : 32,
+	        }
+        }
+    };
+
+    window.onload = function() {
+
+    	var data = window.location.getParam('data');
+
+    	if (data !== null){
+			data = JSON.parse(decodeURI(data));
+
+			config.options.title.text = data.title;
+
+			for(k in data.values){
+			config.data.datasets[0].data.push(data.values[k]);
+			config.data.datasets[0].labels.push(k);
+			config.data.datasets[0].backgroundColor.push(chartColors[k]);
+			}
+
+			config.data.labels = config.data.datasets[0].labels;
+
+			var ctx = document.getElementById("chart-area").getContext("2d");
+			var chart = new Chart(ctx, config);
+
+			document.getElementById("js-legend").innerHTML = chart.generateLegend();
+		}
+    };
+
+    </script>
+</body>
+</html>

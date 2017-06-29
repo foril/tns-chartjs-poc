@@ -1,0 +1,9 @@
+<Page actionBarHidden="true" loaded="loaded" >
+
+	<GridLayout rows="*">
+
+		<web-view row="0" id="webview"></web-view>
+		
+	</GridLayout>
+
+</Page>
